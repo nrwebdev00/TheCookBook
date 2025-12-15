@@ -10,7 +10,7 @@ def custom_exception_handler(exc, context):
             msg="",
             note="",
             error_english=str(exc),
-            error=responses.data,
+            error=response.data,
             data=None,
             status_code=response.status_code
         )
