@@ -13,7 +13,7 @@ from core.email import send_confirmation_email as send_mail
 Account = get_user_model()
 
 class RegisterView(APIView):
-    permissions_classes = [AllowAny]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         email = request.data.get("email")
@@ -79,7 +79,7 @@ class ConfirmEmailView(APIView):
             )
         try:
             user = Account.objects.get(id=uid)
-        except User.DoesNotExist:
+        except Account.DoesNotExist:
             return standard_response(
                 success=False,
                 msg="",

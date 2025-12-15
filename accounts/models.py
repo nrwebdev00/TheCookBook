@@ -26,9 +26,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=255)
 
     is_email_verified = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     objects = CustomUserManager()
 
@@ -37,3 +39,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+    def save(self, *args, **kwargs):
+        if self.email:
+            self.email = self.__class__.objects.normalize_email(self.email)
+            super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ["-created_at"]
