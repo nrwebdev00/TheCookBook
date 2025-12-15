@@ -112,3 +112,48 @@ class ConfirmEmailView(APIView):
             },
             status_code=200
         )
+    
+class ResendEmailConfirmation(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return standard_response(
+                success=False,
+                msg="",
+                error_english="Email is required.",
+                error={"email": "Email is required"},
+                status_code=400
+            )
+        
+        try: 
+            user = Account.objects.get(email=email)
+        except Account.DoesNotExist:
+            return standard_response(
+                success=False,
+                msg="",
+                error_english="User not found.",
+                error={"email":"No Emaill address register."},
+                status_code=404
+            )
+        
+        if user.is_email_verified:
+            return standard_response(
+                success=True,
+                msg="Email Address is already verified.",
+                data={},
+                status_code=200
+            )
+        
+        token = make_confirmation_token(str(user.id))
+        url = reverse('accounts:confirm-email', args=[token])
+        confirm_url = f"{settings.SITE_URL}{url}"
+        send_mail(email=user.email, confirm_url=confirm_url)
+
+        return standard_response(
+            success=True,
+            msg="A new confirmation email has been sent.",
+            data={"confirm_url": confirm_url},
+            status_code=200
+        )
